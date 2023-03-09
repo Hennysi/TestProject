@@ -1,0 +1,81 @@
+.estate-info{
+	&-heading{
+		display: flex;
+		span{
+			width: 20%;
+		}
+	}
+	&-main{
+		display: flex;
+		span,
+		.premises{
+			width: 20%;
+		}
+	}
+}
+.letter-holder {
+	padding: 16px;
+	position: absolute;
+	left: 0;
+	top: 0;
+	width: 100%;
+	height: 100%;
+	display: flex;
+	justify-content: center;
+	align-items: center;
+	background: #00000073;
+}
+
+.letter {
+	float: left;
+	font-size: 24px;
+	color: #fff;
+}
+.letter {
+	animation-name: loadingF;
+	animation-duration: 1.6s;
+	animation-iteration-count: infinite;
+	animation-direction: linear;
+}
+
+.l-1 {
+	animation-delay: 0.48s;
+}
+.l-2 {
+	animation-delay: 0.6s;
+}
+.l-3 {
+	animation-delay: 0.72s;
+}
+.l-4 {
+	animation-delay: 0.84s;
+}
+.l-5 {
+	animation-delay: 0.96s;
+}
+.l-6 {
+	animation-delay: 1.08s;
+}
+.l-7 {
+	animation-delay: 1.2s;
+}
+.l-8 {
+	animation-delay: 1.32s;
+}
+.l-9 {
+	animation-delay: 1.44s;
+}
+.l-10 {
+	animation-delay: 1.56s;
+}
+@keyframes loadingF {
+	0% {
+		opacity: 0;
+	}
+	100% {
+		opacity: 1;
+	}
+}
+.pagination{
+
+}
