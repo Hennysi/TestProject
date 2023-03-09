@@ -87,3 +87,106 @@
     add_action( 'customize_controls_enqueue_scripts', 'understrap_child_customize_controls_js' );
 
 
+    add_action( 'wp_ajax_estate_filter', 'estate_filter' );
+    add_action( 'wp_ajax_nopriv_estate_filter', 'estate_filter' );
+
+    function estate_filter() {
+        $response = array();
+
+        $house_name = isset( $_POST['house_name'] ) ? $_POST['house_name'] : null;
+        $location_coordinates = isset( $_POST['location_coordinates'] ) ? $_POST['location_coordinates'] : null;
+        $number_of_floors = isset( $_POST['number_of_floors'] ) ? $_POST['number_of_floors'] : null;
+        $building_type = isset( $_POST['building_type'] ) ? $_POST['building_type'] : null;
+        $eco_friendliness = isset( $_POST['eco_friendliness'] ) ? $_POST['eco_friendliness'] : null;
+        $paged = isset( $_POST['paged'] ) ? $_POST['paged'] : 1;
+
+        $estate_args = array(
+            'post_type'      => 'real_estate',
+            'posts_per_page' => 5,
+            'paged'          => $paged,
+            'meta_query'     => [
+
+            ]
+        );
+
+        if ( $house_name ) {
+            $estate_args['meta_query'][] = [
+                'key'     => 'house_name',
+                'value'   => $house_name,
+                'compare' => 'LIKE'
+            ];
+        }
+
+        if ( $location_coordinates ) {
+            $estate_args['meta_query'][] = [
+                'key'     => 'location_coordinates',
+                'value'   => $location_coordinates,
+                'compare' => 'LIKE'
+            ];
+        }
+
+        if ( $number_of_floors && $number_of_floors !== 'any' ) {
+            $estate_args['meta_query'][] = [
+                'key'     => 'number_of_floors',
+                'value'   => $number_of_floors,
+                'compare' => 'LIKE'
+            ];
+        }
+
+        if ( $building_type && $building_type !== 'any' ) {
+            $estate_args['meta_query'][] = [
+                'key'     => 'building_type',
+                'value'   => $building_type,
+                'compare' => '='
+            ];
+        }
+
+        if ( $eco_friendliness && $eco_friendliness !== 'any' ) {
+            $estate_args['meta_query'][] = [
+                'key'     => 'eco-friendliness',
+                'value'   => $eco_friendliness,
+                'compare' => 'LIKE'
+            ];
+        }
+
+
+        $estate = new WP_Query( $estate_args );
+        if ( $estate->have_posts() ):
+            ob_start();
+            while ( $estate->have_posts() ): $estate->the_post(); ?>
+                <div class="col-md-4 estate-item">
+                    <?php if ( $image = get_field( 'image' ) ): ?>
+                        <div class="image">
+                            <a href="<?php echo get_the_permalink() ?>">
+                                <?php echo wp_get_attachment_image( $image['ID'], 'large' ); ?>
+                            </a>
+                        </div>
+                        <?php if ( $house_name = get_field( 'house_name' ) ): ?>
+                            <div class="name"><?php echo $house_name ?></div>
+                        <?php else: ?>
+                            <div class="name"><?php the_title() ?></div>
+                        <?php endif; ?>
+                    <?php endif; ?>
+                </div>
+            <?php endwhile;
+            $response['result'] = ob_get_clean();
+            wp_reset_postdata();
+        else:
+            $response['result'] = '<div class="estate-item-not-found">Вибачте, але нічого не знайдено. Спробуйте щось інше</div>';
+        endif;
+        $max_num_pages = $estate->max_num_pages;
+        if ( $max_num_pages > 1 ) {
+            for ( $i = 1; $i <= $max_num_pages; $i ++ ) {
+                $current = $i === 1 ? 'active' : null;
+
+                $pagination .= '<li class="page-item">';
+                $pagination .= '<a href="#" data-page="' . $i . '" class="page-link ' . $current . '">' . $i . '</a>';
+                $pagination .= '</li>';
+            }
+        }
+
+        $response['pagination'] = $pagination;
+        $response['pages'] = $estate->max_num_pages;
+
+        wp_send_json( $response );
+    }
